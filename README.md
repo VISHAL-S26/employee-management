@@ -1,6 +1,6 @@
 # Employee Management CI/CD Pipeline
 
-End-to-end CI/CD pipeline for a Python Flask web app, using **GitHub → Jenkins → Docker → Kubernetes (kubeadm)** on AWS EC2.
+End-to-end CI/CD pipeline for a Python Flask web app, using **GitHub → Jenkins → Docker → Kubernetes (kubeadm)** on AWS EC2, with **Prometheus + Grafana** monitoring.
 
 Every push to `main` automatically builds, containerizes, and deploys the app to a Kubernetes cluster — no manual steps required.
 
@@ -11,6 +11,8 @@ Developer → git push → GitHub → Webhook → Jenkins
   → Checkout → Build → Docker Build → Push to Docker Hub
   → kubectl apply (Kubernetes) → Rollout Verify
   → Live app on NodePort 30080
+
+Prometheus (scrapes cluster + Jenkins) → Grafana dashboards
 ```
 
 **Infrastructure:** 3 AWS EC2 instances (Ubuntu 22.04)
@@ -27,6 +29,7 @@ Developer → git push → GitHub → Webhook → Jenkins
 - **Containerization:** Docker
 - **Registry:** Docker Hub
 - **Orchestration:** Kubernetes (kubeadm, self-managed)
+- **Monitoring:** Prometheus + Grafana (via Helm, `kube-prometheus-stack`)
 - **Cloud:** AWS EC2
 
 ## Project Structure
@@ -62,12 +65,19 @@ k8s/
 5. Create a Jenkins Pipeline job → Script Path: `employee-management/Jenkinsfile`
 6. Add a GitHub webhook → `http://<jenkins-ip>:8080/github-webhook/`
 7. Push code → pipeline runs automatically → app live at `http://<worker-ip>:30080`
+8. Install monitoring: `helm install monitoring prometheus-community/kube-prometheus-stack -n monitoring --create-namespace -f values.yaml`
 
-## Access the App
+## Access
 
-```
-http://<k8s-worker-1-public-ip>:30080
-```
+| Service | URL |
+|---|---|
+| App | `http://<k8s-worker-1-public-ip>:30080` |
+| Grafana | `http://<node-public-ip>:32000` (login: `admin`) |
+| Prometheus | `http://<node-public-ip>:32090` |
+
+## Monitoring
+
+Prometheus scrapes cluster metrics (via node-exporter + kube-state-metrics) and Jenkins build metrics (via the Jenkins Prometheus plugin, exposed at `/prometheus/`) as an external scrape target. Grafana ships with pre-built Kubernetes dashboards out of the box — no manual dashboard setup needed.
 
 ## Deploying Changes
 
