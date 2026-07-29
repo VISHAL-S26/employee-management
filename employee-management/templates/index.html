@@ -1,3 +1,408 @@
-<!doctype html><html><body><h2>Employees Portal</h2><a href="/add">Add</a><table border=1>{% for e in employees %}<tr><td>{{e.name}}</td><td>{{e.dept}}</td><td>{{e.salary}}</td></tr>{% endfor %}</table></body></html>
-<!-- pipeline test Wed Jul 29 05:34:54 UTC 2026 -->
-Test change Wed Jul 29 05:35:22 UTC 2026
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Employee Management Dashboard</title>
+
+    <!-- Google Font -->
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+
+    <!-- Font Awesome -->
+    <link rel="stylesheet"
+    href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+
+    <!-- CSS -->
+    <link rel="stylesheet"
+    href="{{ url_for('static', filename='style.css') }}">
+
+</head>
+
+<body>
+
+<!-- ==========================
+     NAVBAR
+========================== -->
+
+<nav class="navbar">
+
+    <div class="logo">
+
+        <div class="logo-circle">
+            <i class="fa-solid fa-users"></i>
+        </div>
+
+        <div>
+
+            <h2>Employee Management</h2>
+
+            <small>HR Dashboard</small>
+
+        </div>
+
+    </div>
+
+    <div class="nav-right">
+
+        <span>
+            <i class="fa-solid fa-bell"></i>
+        </span>
+
+        <div class="avatar">
+            A
+        </div>
+
+    </div>
+
+</nav>
+
+
+<div class="container">
+
+<!-- ==========================
+     HERO SECTION
+========================== -->
+
+<section class="hero">
+
+    <h1>
+        Welcome Back 👋
+    </h1>
+
+    <p>
+
+        Manage your employees efficiently with a modern HR dashboard.
+        View employee information, departments and payroll details
+        from one centralized location.
+
+    </p>
+
+</section>
+
+
+<!-- ==========================
+     DASHBOARD TITLE
+========================== -->
+
+<div class="section-title">
+
+    <h2>
+
+        Dashboard Overview
+
+    </h2>
+
+</div>
+
+
+<!-- ==========================
+     STATISTICS
+========================== -->
+
+<div class="stats">
+
+    <!-- Employees -->
+
+    <div class="card">
+
+        <div class="icon-box">
+
+            <i class="fa-solid fa-users"></i>
+
+        </div>
+
+        <h3>Total Employees</h3>
+
+        <h2>{{ employees|length }}</h2>
+
+        <span>
+
+            Active Workforce
+
+        </span>
+
+    </div>
+
+
+    <!-- Department -->
+
+    <div class="card">
+
+        <div class="icon-box">
+
+            <i class="fa-solid fa-building"></i>
+
+        </div>
+
+        <h3>Departments</h3>
+
+        <h2>5</h2>
+
+        <span>
+
+            HR • IT • Finance
+
+        </span>
+
+    </div>
+
+
+    <!-- Payroll -->
+
+    <div class="card">
+
+        <div class="icon-box">
+
+            <i class="fa-solid fa-money-bill-wave"></i>
+
+        </div>
+
+        <h3>Total Payroll</h3>
+
+        <h2>$250K</h2>
+
+        <span>
+
+            Monthly Budget
+
+        </span>
+
+    </div>
+
+
+    <!-- Status -->
+
+    <div class="card">
+
+        <div class="icon-box">
+
+            <i class="fa-solid fa-chart-line"></i>
+
+        </div>
+
+        <h3>Employee Status</h3>
+
+        <h2>100%</h2>
+
+        <span>
+
+            Active
+
+        </span>
+
+    </div>
+
+</div>
+
+<br><br>
+
+<!-- ==========================
+     TOOLBAR
+========================== -->
+
+<div class="toolbar">
+
+    <div class="search-box">
+
+        <i class="fa-solid fa-magnifying-glass"></i>
+
+        <input
+        type="text"
+        placeholder="Search employee...">
+
+    </div>
+
+    <a href="/add" class="btn">
+
+        <i class="fa-solid fa-plus"></i>
+
+        Add Employee
+
+    </a>
+
+</div>
+
+  <!-- ==========================
+     EMPLOYEE TABLE
+========================== -->
+
+<div class="table-card">
+
+{% if employees %}
+
+<table>
+
+    <thead>
+
+        <tr>
+
+            <th>Employee</th>
+            <th>Department</th>
+            <th>Salary</th>
+            <th>Status</th>
+            <th>Actions</th>
+
+        </tr>
+
+    </thead>
+
+    <tbody>
+
+    {% for e in employees %}
+
+        <tr>
+
+            <td>
+
+                <div class="employee">
+
+                    <div class="employee-avatar">
+
+                        {{ e.name[0]|upper }}
+
+                    </div>
+
+                    <div class="employee-info">
+
+                        <h4>{{ e.name }}</h4>
+
+                        <p>Employee</p>
+
+                    </div>
+
+                </div>
+
+            </td>
+
+            <td>
+
+                {{ e.dept }}
+
+            </td>
+
+            <td>
+
+                ${{ e.salary }}
+
+            </td>
+
+            <td>
+
+                <span class="badge badge-success">
+
+                    Active
+
+                </span>
+
+            </td>
+
+            <td>
+
+                <div class="action-buttons">
+
+                    <button
+                    class="icon-btn view-btn"
+                    title="View">
+
+                        <i class="fa-solid fa-eye"></i>
+
+                    </button>
+
+                    <button
+                    class="icon-btn edit-btn"
+                    title="Edit">
+
+                        <i class="fa-solid fa-pen"></i>
+
+                    </button>
+
+                    <button
+                    class="icon-btn delete-btn"
+                    title="Delete">
+
+                        <i class="fa-solid fa-trash"></i>
+
+                    </button>
+
+                </div>
+
+            </td>
+
+        </tr>
+
+    {% endfor %}
+
+    </tbody>
+
+</table>
+
+{% else %}
+
+<div class="empty">
+
+    <i class="fa-solid fa-users"></i>
+
+    <h3>
+
+        No Employees Found
+
+    </h3>
+
+    <p>
+
+        Your employee list is currently empty.
+
+        Click the button below to add your first employee.
+
+    </p>
+
+    <br>
+
+    <a href="/add" class="btn">
+
+        <i class="fa-solid fa-plus"></i>
+
+        Add First Employee
+
+    </a>
+
+</div>
+
+{% endif %}
+
+</div>
+
+<!-- ==========================
+     FOOTER
+========================== -->
+
+<footer class="footer">
+
+    <p>
+
+        © 2026 Employee Management System
+
+    </p>
+
+    <br>
+
+    <p>
+
+        Built with
+
+        <i class="fa-solid fa-heart" style="color:#ef4444;"></i>
+
+        using Flask • Python • Docker • Kubernetes • Jenkins • AWS
+
+    </p>
+
+</footer>
+
+</div>
+
+</body>
+
+</html>
