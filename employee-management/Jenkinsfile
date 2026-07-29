@@ -1,0 +1,95 @@
+pipeline {
+    agent any
+
+    environment {
+        // Change this to your own Docker Hub username
+        DOCKERHUB_USER   = 'vishal262000'
+        IMAGE_NAME       = "${DOCKERHUB_USER}/employee-management"
+        IMAGE_TAG        = "${env.BUILD_NUMBER}"
+        DOCKERHUB_CREDS  = credentials('docker-hub-creds')
+        KUBECONFIG_CRED  = 'kubeconfig'
+    }
+
+    stages {
+
+        stage('Checkout Source Code') {
+            steps {
+                echo 'Pulling latest source code from GitHub...'
+                checkout scm
+            }
+        }
+
+        stage('Build Application') {
+            steps {
+                dir('employee-management') {
+                    echo 'Installing dependencies to validate the app builds...'
+                    sh '''
+                        python3 -m venv venv
+                        . venv/bin/activate
+                        pip install --no-cache-dir -r requirements.txt
+                    '''
+                }
+            }
+        }
+
+        stage('Build Docker Image') {
+            steps {
+                dir('employee-management') {
+                    echo "Building Docker image ${IMAGE_NAME}:${IMAGE_TAG}..."
+                    sh "docker build -t ${IMAGE_NAME}:${IMAGE_TAG} -t ${IMAGE_NAME}:latest ."
+                }
+            }
+        }
+
+        stage('Push Image to Docker Hub') {
+            steps {
+                echo 'Logging in and pushing image to Docker Hub...'
+                sh '''
+                    echo "$DOCKERHUB_CREDS_PSW" | docker login -u "$DOCKERHUB_CREDS_USR" --password-stdin
+                    docker push ${IMAGE_NAME}:${IMAGE_TAG}
+                    docker push ${IMAGE_NAME}:latest
+                '''
+            }
+        }
+
+        stage('Deploy to Kubernetes') {
+            steps {
+                withCredentials([file(credentialsId: "${KUBECONFIG_CRED}", variable: 'KUBECONFIG_FILE')]) {
+                    sh '''
+                        export KUBECONFIG=$KUBECONFIG_FILE
+                        sed -i "s|IMAGE_PLACEHOLDER|${IMAGE_NAME}:${IMAGE_TAG}|g" k8s/deployment.yaml
+                        kubectl apply -f k8s/deployment.yaml
+                        kubectl apply -f k8s/service.yaml
+                        kubectl rollout status deployment/employee-management-deployment --timeout=120s
+                    '''
+                }
+            }
+        }
+
+        stage('Verify Deployment') {
+            steps {
+                withCredentials([file(credentialsId: "${KUBECONFIG_CRED}", variable: 'KUBECONFIG_FILE')]) {
+                    sh '''
+                        export KUBECONFIG=$KUBECONFIG_FILE
+                        echo "Pods:"
+                        kubectl get pods -l app=employee-management
+                        echo "Service:"
+                        kubectl get svc employee-management-service
+                    '''
+                }
+            }
+        }
+    }
+
+    post {
+        success {
+            echo '✅ Pipeline completed successfully. App deployed to Kubernetes.'
+        }
+        failure {
+            echo '❌ Pipeline failed. Check the stage logs above.'
+        }
+        always {
+            sh 'docker logout || true'
+        }
+    }
+}
