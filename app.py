@@ -22,15 +22,9 @@ def add():
     return render_template("add.html")
 
 
-@app.route("/delete/<int:index>")
-def delete(index):
-    if 0 <= index < len(employees):
-        employees.pop(index)
-    return redirect("/")
-
-
 @app.route("/edit/<int:index>", methods=["GET", "POST"])
 def edit(index):
+
     if index >= len(employees):
         return redirect("/")
 
@@ -38,10 +32,20 @@ def edit(index):
         employees[index]["name"] = request.form["name"]
         employees[index]["dept"] = request.form["dept"]
         employees[index]["salary"] = request.form["salary"]
+
         return redirect("/")
 
     return render_template("edit.html", employee=employees[index])
 
 
+@app.route("/delete/<int:index>")
+def delete(index):
+
+    if index < len(employees):
+        employees.pop(index)
+
+    return redirect("/")
+
+
 if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=5000)
+    app.run(host="0.0.0.0", port=5000, debug=True)
