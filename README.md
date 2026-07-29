@@ -6,6 +6,8 @@ Every push to `main` automatically builds, containerizes, and deploys the app to
 
 ## Architecture
 
+![CI/CD Pipeline Architecture](docs/architecture-diagram.png)
+
 ```
 Developer → git push → GitHub → Webhook → Jenkins
   → Checkout → Build → Docker Build → Push to Docker Hub
